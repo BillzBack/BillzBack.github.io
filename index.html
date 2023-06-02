@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Aim Test</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    #game-area {
+      position: relative;
+      width: 400px;
+      height: 200px;
+      margin: 20px auto;
+      border: 2px solid #000;
+    }
+
+    .orb {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background-color: yellow;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    #status {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Aim Test</h1>
+  <div id="game-area"></div>
+  <div id="status">
+    <p id="score">Score: 0</p>
+    <p id="timer">Time: 0s</p>
+    <button onclick="startGame()">Start Game</button>
+    <button onclick="quitGame()">Quit Game</button>
+  </div>
+
+  <script>
+    var gameArea = null;
+    var orbs = [];
+    var score = 0;
+    var startTime = 0;
+    var endTime = 0;
+    var timerInterval = null;
+
+    function startGame() {
+      document.getElementById("status").style.display = "block";
+      document.getElementById("score").innerText = "Score: " + score;
+      gameArea = document.getElementById("game-area");
+
+      // Reset the game
+      orbs = [];
+      score = 0;
+
+      // Generate initial orbs
+      generateOrbs(10);
+
+      // Start the timer
+      startTime = performance.now();
+      startTimer();
+
+      // Start the game loop
+      gameLoop();
+    }
+
+    function quitGame() {
+      // Stop the timer
+      clearInterval(timerInterval);
+
+      // Remove orbs from the game area
+      orbs.forEach(function (orb) {
+        orb.parentNode.removeChild(orb);
+      });
+
+      // Clear the orbs array
+      orbs = [];
+    }
+
+    function generateOrbs(numOrbs) {
+      for (let i = 0; i < numOrbs; i++) {
+        createOrb();
+      }
+    }
+
+    function createOrb() {
+      const orb = document.createElement("div");
+      orb.className = "orb";
+      orb.style.left = Math.floor(Math.random() * 380) + "px";
+      orb.style.top = Math.floor(Math.random() * 180) + "px";
+      gameArea.appendChild(orb);
+      orbs.push(orb);
+
+      // Add click event listener to each orb
+      orb.addEventListener("click", function () {
+        orb.style.display = "none";
+        score++;
+        document.getElementById("score").innerText = "Score: " + score;
+
+        // Remove the orb from the array
+        orbs.splice(orbs.indexOf(orb), 1);
+
+        // Check if all orbs have been clicked
+        if (orbs.length === 0) {
+          endTime = performance.now();
+          var totalTime = ((endTime - startTime) / 1000).toFixed(2);
+          clearInterval(timerInterval);
+          alert("Game Over!\nYour Score: " + score + "\nTotal Time: " + totalTime + "s");
+          quitGame();
+        }
+      });
+    }
+
+    function startTimer() {
+      // Remove existing timer element
+      var timerElement = document.getElementById("timer");
+      if (timerElement) {
+        timerElement.parentNode.removeChild(timerElement);
+      }
+
+      // Create new timer element
+      timerElement = document.createElement("p");
+      timerElement.id = "timer";
+      timerElement.innerText = "Time: 0s";
+      document.getElementById("status").appendChild(timerElement);
+
+      var seconds = 0;
+
+      timerInterval = setInterval(function () {
+        seconds++;
+        timerElement.innerText = "Time: " + seconds + "s";
+      }, 1000);
+    }
+
+    function gameLoop() {
+      // Repeat the game loop
+      requestAnimationFrame(gameLoop);
+    }
+  </script>
+</body>
+</html>
